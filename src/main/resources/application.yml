@@ -1,0 +1,40 @@
+server:
+    port: 8080
+    context-path: /topology
+    session:
+      timeout: 30
+    tomcat:
+      uri-encoding: utf-8
+
+logging:
+    level:
+        root: info
+        gxf.dev.topology: debug
+        #当配置了loggin.path属性时，将在该路径下生成spring.log文件，即：此时使用默认的日志文件名spring.log
+        #当配置了loggin.file属性时，将在指定路径下生成指定名称的日志文件。默认为项目相对路径，可以为logging.file指定绝对路径。
+        #path: /home/gongxufan/logs
+    file: topology.log
+
+spring:
+    jpa:
+      show-sql: true
+      open-in-view: false
+      hibernate:
+        naming:
+          #配置ddl建表字段和实体字段一致
+          physical-strategy: gxf.dev.topology.config.RealNamingStrategyImpl
+          ddl-auto: update
+      properties:
+        hibernate:
+          format_sql: true
+          show_sql: true
+          dialect: org.hibernate.dialect.MySQL5Dialect
+    datasource:
+        url: jdbc:mysql://localhost:3306/topology
+        driver-class-name: com.mysql.jdbc.Driver
+        username: root
+        password: qwe
+        hikari:
+              maxLifetime: 1765000 #缺省:30分钟
+              maximumPoolSize: 15 #连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count)
+
