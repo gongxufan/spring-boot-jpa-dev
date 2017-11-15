@@ -25,6 +25,13 @@ public class CustomSqlDao {
     @Autowired
     private EntityManagerFactory entityManagerFactory;
 
+    /**
+     * 获取当前表字段的下一个自增值
+     * 要求字段是数值类型或者数字的字符串，建议不使用高并发可能会重复
+     * @param filedName
+     * @param tableName
+     * @return
+     */
     public int getMaxColumn(final String filedName, final String tableName) {
         String sql = "select nvl(max(" + filedName + "), 0)  as max_num from " + tableName;
         Map map =  entityManagerFactory.getProperties();
@@ -39,9 +46,9 @@ public class CustomSqlDao {
             }
         }
         int maxID = 0;
-        List<Map<String, Object>> list = this.querySqlObjects(sql);
+        List list = this.queryForList(sql);
         if (list.size() > 0) {
-            Object maxNum = list.get(0).get("max_num");
+            Object maxNum = list.get(0);
             if(maxNum instanceof Number)
                 maxID = ((Number)maxNum).intValue();
             if(maxNum instanceof String)
@@ -62,7 +69,14 @@ public class CustomSqlDao {
         return this.querySqlObjects(sql, params, null, null);
     }
 
-    @SuppressWarnings("unchecked")
+    /**
+     * 原生sql查询，支持多条件的分页查询操作
+     * @param sql
+     * @param params
+     * @param currentPage
+     * @param rowsInPage
+     * @return
+     */
     public List<Map<String, Object>> querySqlObjects(String sql, Object params, Integer currentPage, Integer rowsInPage) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         Query qry = entityManager.createNativeQuery(sql);
@@ -106,11 +120,16 @@ public class CustomSqlDao {
     }
 
 
-    public int getCount(String sql) {
-        String sqlCount = "select count(0) as count_num from " + sql;
-        List<Map<String, Object>> list = this.querySqlObjects(sqlCount);
+    /**
+     * 行统计
+     * @param tableName
+     * @return
+     */
+    public int getCount(String tableName) {
+        String sqlCount = "select count(0) as count_num from " + tableName;
+        List list = this.queryForList(sqlCount);
         if (list.size() > 0) {
-            int countNum = ((BigDecimal) list.get(0).get("COUNT_NUM")).intValue();
+            int countNum = ((Number) list.get(0)).intValue();
             return countNum;
         } else {
             return 0;
@@ -152,13 +171,13 @@ public class CustomSqlDao {
     /**
      * 根据hql语句查询数据
      *
-     * @param hql
+     * @param sql
      * @return
      */
     @SuppressWarnings("rawtypes")
-    public List queryForList(String hql, List<Object> params) {
+    public List queryForList(String sql, List<Object> params) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
-        Query query = entityManager.createQuery(hql);
+        Query query = entityManager.createNativeQuery(sql);
         List list = null;
         try {
             if (params != null && !params.isEmpty()) {
@@ -207,8 +226,8 @@ public class CustomSqlDao {
     }
 
     @SuppressWarnings("rawtypes")
-    public List queryForList(String hql) {
-        return queryForList(hql, null);
+    public List queryForList(String sql) {
+        return queryForList(sql, null);
     }
 
 

@@ -33,4 +33,9 @@ public class ServiceTest {
         System.out.println(customSqlDao.querySqlObjects("select * from node"));
         System.out.println(customSqlDao.getMaxColumn("id","node"));
     }
+
+    @Test
+    public void count(){
+        customSqlDao.getCount("node");
+    }
 }
